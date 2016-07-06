@@ -10,7 +10,6 @@ import java.util.Set;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.server.resources.Resource;
 
-import de.thingweb.repository.WelcomePageHandler;
 import de.thingweb.repository.rest.RESTHandler;
 import de.thingweb.repository.rest.RESTServerInstance;
 
@@ -19,15 +18,9 @@ public class CoAPServer implements RESTServerInstance {
   protected CoapServer server;
   protected Thread t;
   
-  public CoAPServer(int port, RESTHandler root)
+  public CoAPServer(int port)
   {
-    server = new CoapServer(port) {
-      @Override
-      protected Resource createRoot()
-      {
-        return new CoAPRESTResource(root);
-      }
-    };
+    server = new CoapServer(port);
   }
   
   public void init(Map<String, RESTHandler> resources)

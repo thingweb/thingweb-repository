@@ -16,12 +16,11 @@ public class HTTPServer implements RESTServerInstance {
   protected Server server;
   protected ServletHandler handler;
   
-  public HTTPServer(int port, RESTHandler root)
+  public HTTPServer(int port)
   {
     server = new Server(port);
     handler = new ServletHandler();
     server.setHandler(handler);
-    add("", root);
   }
   
   @Override

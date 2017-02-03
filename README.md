@@ -188,4 +188,12 @@ coap://localhost:8080/td-lookup/sem?rdf=http://example.org/lightBrightness
 
 ## Swagger Specification of Thingweb-Repository API
 
+## Starting using Docker
+
+Download the project and build it (see [Building](#Building). If you don't already have them installed, install docker and docker-compose. Open a terminal window and change directory to the thingweb-repository folder. To build the docker container run:
+docker-compose build
+
+To run the ThingWeb-Repository server use:
+docker-compose up
+
 ## TODOs

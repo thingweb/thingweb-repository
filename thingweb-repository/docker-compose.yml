@@ -1,0 +1,9 @@
+---
+version: '2'
+
+services:
+  thingweb-repository:
+    ports:
+      - 8080:8080
+      - 5683:5683
+    build: .

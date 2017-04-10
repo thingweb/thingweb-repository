@@ -166,17 +166,17 @@ public class ThingDescriptionCollectionHandler extends RESTHandler {
 		dataset.begin(ReadWrite.WRITE);
 		try {
 			
-			Model tdb = dataset.getNamedModel(resourceUri.toString());
-			tdb.read(new ByteArrayInputStream(data.getBytes()), endpointName, "JSON-LD");
-			// TODO check TD validity
-
-			tdb = dataset.getDefaultModel();
-			tdb.createResource(resourceUri.toString()).addProperty(DC.source, data);
-
-			// Get key words from statements
+			//New graph model
+			Model tdbnm = dataset.getNamedModel(resourceUri.toString());
+			tdbnm.read(new ByteArrayInputStream(data.getBytes()), null, "JSON-LD");
 			ThingDescriptionUtils utils = new ThingDescriptionUtils();
-			Model newThing = dataset.getNamedModel(resourceUri.toString());
-			keyWords = utils.getModelKeyWords(newThing);
+			keyWords = utils.getModelKeyWords(tdbnm);
+			// TODO check TD validity
+			//dataset.close();
+
+			//Adding the information of the new TD into the Default Model
+			Model tdb = dataset.getDefaultModel();
+			tdb.createResource(resourceUri.toString()).addProperty(DC.source, data);
 
 			// Store key words as triple: ?g_id rdfs:comment "keyWordOrWords"
 			tdb.getResource(resourceUri.toString()).addProperty(RDFS.comment, StrUtils.strjoin(" ", keyWords));

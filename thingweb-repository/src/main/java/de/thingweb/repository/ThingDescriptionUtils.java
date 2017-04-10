@@ -85,30 +85,39 @@ public class ThingDescriptionUtils
    * Returns the ID of a thing description stored in the database given its URI.
    * @param uri URI of the thing description we want to return.
    * @return the ID of the thing description.
-   */
+   */  
   public static String getThingDescriptionIdFromUri(String uri) {
 	
-	String query = "?td <http://www.w3c.org/wot/td#associatedUri> <" + uri + ">";
+
+	String prefix = StrUtils.strjoinNL("PREFIX  dc: <http://purl.org/dc/elements/1.1/>"
+				  					, "PREFIX  : <.>");
+
 	String id = "NOT FOUND";
-	  
+	// Run the query
 	Dataset dataset = Repository.get().dataset;
 	dataset.begin(ReadWrite.READ);
 
 	try {
-	  String q = "SELECT ?g_id WHERE { GRAPH ?g_id { " + query + " }}";
-	  try (QueryExecution qexec = QueryExecutionFactory.create(q, dataset)) {
+
+	  String query = "SELECT DISTINCT ?s WHERE {?s dc:source ?uris FILTER regex(?uris, \""+ uri +"\", \"i\")}";
+	  Query q = QueryFactory.create(prefix + "\n" + query);	
+
+	  try {
+		QueryExecution qexec = QueryExecutionFactory.create(q , dataset);
 		ResultSet result = qexec.execSelect();
-		while (result.hasNext()) { 
-			id = result.next().get("g_id").toString();
+		while (result.hasNext()) {
+			QuerySolution i = result.next();
+			id = i.get("s").toString();
 		}
+		qexec.close();
+
+	  } catch (Exception e) {
+		throw e;
 	  }
-	catch (Exception e) {
-	  throw e;
-	}
 	} finally {
 	  dataset.end();
 	}
-	
+
 	return id;
   }
 

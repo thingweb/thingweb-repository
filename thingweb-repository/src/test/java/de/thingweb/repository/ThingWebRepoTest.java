@@ -86,7 +86,25 @@ public class ThingWebRepoTest {
 		byte[] content;
 		String tdId, tdId2, td;
 		
+		// LOOKUP
+		Set<String> tdIds;
+		JsonObject fanQR;
+
 		Map<String,String> parameters = new HashMap<String,String>();
+		
+		//DELETE EXISTING TDs FIRST
+
+		parameters.clear();
+		resource = tdch.get(new URI(baseUri + "/td"), parameters);
+
+		fanQR = JSON.parse(resource.content);
+		tdIds = fanQR.keys();
+		
+		for (String item : tdIds){
+			tdch.delete(new URI(baseUri + item), null, null);
+		}
+
+		parameters.clear();
 		parameters.put("ep", baseUri);
 		
 		// POST TD fan
@@ -107,12 +125,8 @@ public class ThingWebRepoTest {
 			
 		td = ThingDescriptionUtils.getThingDescriptionIdFromUri(tdUri2);
 		Assert.assertEquals("TD temperatureSensor not registered", baseUri + tdId2, td);
-		
-		
-		// LOOKUP
-		Set<String> tdIds;
-		JsonObject fanQR;
-		
+		in.close();
+				
 		// GET by sparql query
 		parameters.clear();
 		parameters.put("query", "?s ?p ?o");
@@ -120,7 +134,7 @@ public class ThingWebRepoTest {
 		
 		fanQR = JSON.parse(resource.content);
 		tdIds = fanQR.keys();
-		Assert.assertFalse("TD fan not found", tdIds.isEmpty());
+		Assert.assertFalse("TD is Empty", tdIds.isEmpty());
 		//Assert.assertEquals("Found more than one TD", 1, tdIds.size());
 		Assert.assertTrue("TD fan not found", tdIds.contains(tdId));
 		
@@ -135,8 +149,6 @@ public class ThingWebRepoTest {
 		Assert.assertFalse("TD fan not found", tdIds.isEmpty());
 		Assert.assertTrue("TD fan not found", tdIds.contains(tdId));
 		Assert.assertFalse("TD temperatureSensor found", tdIds.contains(tdId2));
-		
-		
 		
 		// GET TD by id
 		ThingDescriptionHandler tdh = new ThingDescriptionHandler(tdId, Repository.get().servers);

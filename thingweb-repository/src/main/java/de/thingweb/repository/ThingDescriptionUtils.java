@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,16 +29,13 @@ import org.apache.jena.query.ResultSet;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.util.QueryExecUtils;
 
 public class ThingDescriptionUtils
 {
@@ -85,30 +81,39 @@ public class ThingDescriptionUtils
    * Returns the ID of a thing description stored in the database given its URI.
    * @param uri URI of the thing description we want to return.
    * @return the ID of the thing description.
-   */
+   */  
   public static String getThingDescriptionIdFromUri(String uri) {
 	
-	String query = "?td <http://www.w3c.org/wot/td#associatedUri> <" + uri + ">";
+
+	String prefix = StrUtils.strjoinNL("PREFIX  dc: <http://purl.org/dc/elements/1.1/>"
+				  					, "PREFIX  : <.>");
+
 	String id = "NOT FOUND";
-	  
+	// Run the query
 	Dataset dataset = Repository.get().dataset;
 	dataset.begin(ReadWrite.READ);
 
 	try {
-	  String q = "SELECT ?g_id WHERE { GRAPH ?g_id { " + query + " }}";
-	  try (QueryExecution qexec = QueryExecutionFactory.create(q, dataset)) {
+
+	  String query = "SELECT DISTINCT ?s WHERE {?s dc:source ?uris FILTER regex(?uris, \""+ uri +"\", \"i\")}";
+	  Query q = QueryFactory.create(prefix + "\n" + query);	
+
+	  try {
+		QueryExecution qexec = QueryExecutionFactory.create(q , dataset);
 		ResultSet result = qexec.execSelect();
-		while (result.hasNext()) { 
-			id = result.next().get("g_id").toString();
+		while (result.hasNext()) {
+			QuerySolution i = result.next();
+			id = i.get("s").toString();
 		}
+		qexec.close();
+
+	  } catch (Exception e) {
+		throw e;
 	  }
-	catch (Exception e) {
-	  throw e;
-	}
 	} finally {
 	  dataset.end();
 	}
-	
+
 	return id;
   }
 
@@ -343,14 +348,14 @@ public class ThingDescriptionUtils
 	dataset.begin(ReadWrite.READ);
 	
 	try {
-	  String query = "SELECT DISTINCT ?g WHERE { GRAPH ?g { " + qMatch + " }}";
+	  String query = "SELECT DISTINCT ?s WHERE { GRAPH ?g { " + qMatch + " }}";
 	  Query q = QueryFactory.create(prefix + "\n" + query);
 	  
 	  try {
 		QueryExecution qexec = QueryExecutionFactory.create(q , dataset);
 		ResultSet result = qexec.execSelect();
 		while (result.hasNext()) {
-		  tds.add(result.next().get("g").asResource().getURI());
+		  tds.add(result.next().get("s").asResource().getURI());
 		}
 	  } catch (Exception e) {
 		throw e;

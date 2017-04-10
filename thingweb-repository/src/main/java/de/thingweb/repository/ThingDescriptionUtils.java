@@ -343,14 +343,15 @@ public class ThingDescriptionUtils
 	dataset.begin(ReadWrite.READ);
 	
 	try {
-	  String query = "SELECT DISTINCT ?g WHERE { GRAPH ?g { " + qMatch + " }}";
+	  //String query = "SELECT DISTINCT ?g WHERE { GRAPH ?g { " + qMatch + " }}";
+	  String query = "SELECT DISTINCT ?s {" + qMatch + "}";
 	  Query q = QueryFactory.create(prefix + "\n" + query);
 	  
 	  try {
 		QueryExecution qexec = QueryExecutionFactory.create(q , dataset);
 		ResultSet result = qexec.execSelect();
 		while (result.hasNext()) {
-		  tds.add(result.next().get("g").asResource().getURI());
+		  tds.add(result.next().get("s").asResource().getURI());
 		}
 	  } catch (Exception e) {
 		throw e;

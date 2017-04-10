@@ -343,8 +343,7 @@ public class ThingDescriptionUtils
 	dataset.begin(ReadWrite.READ);
 	
 	try {
-	  //String query = "SELECT DISTINCT ?g WHERE { GRAPH ?g { " + qMatch + " }}";
-	  String query = "SELECT DISTINCT ?s {" + qMatch + "}";
+	  String query = "SELECT DISTINCT ?s WHERE { GRAPH ?g { " + qMatch + " }}";
 	  Query q = QueryFactory.create(prefix + "\n" + query);
 	  
 	  try {
